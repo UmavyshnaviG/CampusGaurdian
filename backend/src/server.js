@@ -15,6 +15,11 @@ const grievanceRoutes = require('./routes/grievances');
 const uploadRoutes = require('./routes/upload');
 const patternRoutes = require('./routes/patterns');
 const actionRoutes = require('./routes/actions');
+const outcomeRoutes = require('./routes/outcomes');
+const departmentRoutes = require('./routes/departments');
+const { seedDepartments } = require('./routes/departments');
+const searchRoutes = require('./routes/search');
+const evaluationRoutes = require('./routes/evaluation');
 
 // ---------------------------------------------------------------------------
 // App
@@ -59,6 +64,10 @@ app.use('/api/grievances', grievanceRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/patterns', patternRoutes);
 app.use('/api/actions', actionRoutes);
+app.use('/api/outcomes', outcomeRoutes);
+app.use('/api/departments', departmentRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/evaluation', evaluationRoutes);
 
 // 404 fallthrough handler
 app.use((_req, res) => {
@@ -105,6 +114,7 @@ const PORT = process.env.PORT || 5000;
 
 async function bootstrap() {
   await connectDB();
+  await seedDepartments();
   httpServer.listen(PORT, () => {
     console.log(`[Server] Campus Guardian 360 backend listening on port ${PORT}`);
   });

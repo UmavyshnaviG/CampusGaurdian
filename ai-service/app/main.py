@@ -72,12 +72,14 @@ app.add_middleware(
 # Include routers
 # ---------------------------------------------------------------------------
 
-from app.routers import analysis, patterns, actions, evaluation  # noqa: E402
+from app.routers import analysis, patterns, actions, evaluation, outcomes, search  # noqa: E402
 
 app.include_router(analysis.router, prefix="/api/ai")
 app.include_router(patterns.router, prefix="/api/ai")
 app.include_router(actions.router, prefix="/api/ai")
 app.include_router(evaluation.router, prefix="/api/ai")
+app.include_router(outcomes.router, prefix="/api/ai")
+app.include_router(search.router, prefix="/api/ai")
 
 # ---------------------------------------------------------------------------
 # Core endpoints

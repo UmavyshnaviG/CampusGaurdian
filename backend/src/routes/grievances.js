@@ -10,6 +10,7 @@ const {
   listGrievances,
   getGrievanceById,
   updateStatus,
+  getSensitiveIdentity,
 } = require('../controllers/grievanceController');
 
 const router = express.Router();
@@ -101,6 +102,16 @@ router.patch(
       .withMessage('Note must be at most 500 characters.'),
   ],
   updateStatus,
+);
+
+// ---------------------------------------------------------------------------
+// GET /:id/identity  — reveal sensitive identity (admin / sensitive_officer)
+// ---------------------------------------------------------------------------
+router.get(
+  '/:id/identity',
+  authenticate,
+  authorize('admin', 'sensitive_officer'),
+  getSensitiveIdentity,
 );
 
 module.exports = router;

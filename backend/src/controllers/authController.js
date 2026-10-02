@@ -2,6 +2,7 @@
 
 const { validationResult } = require('express-validator');
 const authService = require('../services/authService');
+const AuditLog = require('../models/AuditLog');
 
 /**
  * POST /api/auth/register
@@ -94,4 +95,44 @@ async function getMe(req, res) {
   }
 }
 
-module.exports = { register, login, getMe };
+/**
+ * GET /api/auth/audit
+ * List audit logs with optional filters and pagination (admin only).
+ */
+async function listAuditLogs(req, res) {
+  try {
+    const page  = Math.max(1, parseInt(req.query.page,  10) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit, 10) || 50);
+    const skip  = (page - 1) * limit;
+
+    const filter = {};
+    if (req.query.userId)     filter.userId     = req.query.userId;
+    if (req.query.actionType) filter.actionType = req.query.actionType;
+    if (req.query.startDate || req.query.endDate) {
+      filter.timestamp = {};
+      if (req.query.startDate) filter.timestamp.$gte = new Date(req.query.startDate);
+      if (req.query.endDate)   filter.timestamp.$lte = new Date(req.query.endDate);
+    }
+
+    const [logs, total] = await Promise.all([
+      AuditLog.find(filter)
+        .sort({ timestamp: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('userId', 'fullName email')
+        .lean(),
+      AuditLog.countDocuments(filter),
+    ]);
+
+    const pages = Math.ceil(total / limit);
+
+    return res.status(200).json({
+      success: true,
+      data: { logs, total, page, pages },
+    });
+  } catch (err) {
+    throw err;
+  }
+}
+
+module.exports = { register, login, getMe, listAuditLogs };

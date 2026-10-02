@@ -161,4 +161,42 @@ async function updateStatus(req, res, next) {
   }
 }
 
-module.exports = { submitGrievance, listGrievances, getGrievanceById, updateStatus };
+// ---------------------------------------------------------------------------
+// getSensitiveIdentity  GET /api/grievances/:id/identity
+// ---------------------------------------------------------------------------
+async function getSensitiveIdentity(req, res, next) {
+  try {
+    const grievance = await grievanceService.getGrievanceById(
+      req.params.id,
+      req.user.role,
+      req.user.id,
+    );
+
+    if (!grievance) {
+      return res.status(404).json({ success: false, message: 'Grievance not found.' });
+    }
+
+    if (!grievance.isAnonymousSensitive) {
+      return res.status(403).json({
+        success: false,
+        message: 'This grievance is not an anonymous sensitive case.',
+      });
+    }
+
+    // Re-fetch with sensitiveIdentity projected and populated
+    const { Grievance } = require('../models/Grievance');
+    const full = await Grievance.findById(req.params.id)
+      .select('+sensitiveIdentity')
+      .populate('sensitiveIdentity', 'fullName email role')
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      data: { identity: full ? full.sensitiveIdentity : null },
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = { submitGrievance, listGrievances, getGrievanceById, updateStatus, getSensitiveIdentity };

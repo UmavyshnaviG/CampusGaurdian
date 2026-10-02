@@ -3,7 +3,7 @@
 const express = require('express');
 const { body } = require('express-validator');
 const authController = require('../controllers/authController');
-const { authenticate, auditLog } = require('../middleware/auth');
+const { authenticate, authorize, auditLog } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -71,6 +71,14 @@ router.get(
   authenticate,
   auditLog('GET_ME', 'User'),
   authController.getMe,
+);
+
+// GET /api/auth/audit
+router.get(
+  '/audit',
+  authenticate,
+  authorize('admin'),
+  authController.listAuditLogs,
 );
 
 module.exports = router;
