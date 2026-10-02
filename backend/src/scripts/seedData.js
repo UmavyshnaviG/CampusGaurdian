@@ -162,19 +162,17 @@ async function seedHistoricalData() {
 }
 
 // ---------------------------------------------------------------------------
-// Auto-seed check — called from server.js bootstrap
+// Auto-seed — always runs on every backend start
+// Clears existing historical records first, then re-inserts fresh from CSV
 // ---------------------------------------------------------------------------
 async function autoSeedIfEmpty() {
   try {
-    const count = await Grievance.countDocuments({ isHistorical: true });
-    if (count > 0) {
-      console.log(`[Seed] Historical data already present (${count} records). Skipping seed.`);
-      return;
-    }
-    console.log('[Seed] No historical data found. Starting auto-seed...');
+    console.log('[Seed] Clearing existing historical grievances...');
+    await Grievance.deleteMany({ isHistorical: true });
+    console.log('[Seed] Starting fresh seed from CSV...');
     const result = await seedHistoricalData();
     if (result.seeded > 0) {
-      console.log(`[Seed] Auto-seed complete. ${result.seeded} records inserted.`);
+      console.log(`[Seed] ✅ Seeded ${result.seeded} historical grievances into MongoDB.`);
       console.log('[Seed] Tip: Go to /admin/patterns and click "Refresh Patterns" to run AI analysis.');
     }
   } catch (err) {
