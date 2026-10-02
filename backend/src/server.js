@@ -10,6 +10,7 @@ const rateLimit = require('express-rate-limit');
 const { Server: SocketIOServer } = require('socket.io');
 
 const { connect: connectDB } = require('./config/database');
+const { autoSeedIfEmpty } = require('./scripts/seedData');
 const authRoutes = require('./routes/auth');
 const grievanceRoutes = require('./routes/grievances');
 const uploadRoutes = require('./routes/upload');
@@ -115,6 +116,7 @@ const PORT = process.env.PORT || 5000;
 async function bootstrap() {
   await connectDB();
   await seedDepartments();
+  await autoSeedIfEmpty();   // seeds historical CSV data if collection is empty
   httpServer.listen(PORT, () => {
     console.log(`[Server] Campus Guardian 360 backend listening on port ${PORT}`);
   });
