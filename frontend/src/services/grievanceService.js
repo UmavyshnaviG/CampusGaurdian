@@ -23,6 +23,23 @@ export async function getMyGrievances(page = 1, limit = 10) {
 }
 
 /**
+ * getGrievances — admin/officer view with optional filters and pagination.
+ * @param {{ category?: string, status?: string, severity?: string, isSensitive?: boolean,
+ *           page?: number, limit?: number }} filters
+ */
+export async function getGrievances(filters = {}) {
+  const params = {};
+  if (filters.category)    params.category    = filters.category;
+  if (filters.status)      params.status      = filters.status;
+  if (filters.severity)    params.severity    = filters.severity;
+  if (filters.isSensitive !== undefined) params.isSensitive = filters.isSensitive;
+  if (filters.page)        params.page        = filters.page;
+  if (filters.limit)       params.limit       = filters.limit;
+  const response = await api.get('/grievances', { params });
+  return response.data;
+}
+
+/**
  * getGrievanceById
  * @param {string} id — MongoDB ObjectId
  */

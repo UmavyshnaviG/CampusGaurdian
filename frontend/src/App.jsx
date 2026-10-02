@@ -11,37 +11,27 @@ import MyGrievances from './pages/user/MyGrievances';
 import GrievanceDetail from './pages/user/GrievanceDetail';
 
 // Admin portal pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminGrievances from './pages/admin/AdminGrievances';
 import UploadDataset from './pages/admin/UploadDataset';
 import Patterns from './pages/admin/Patterns';
 import PatternDetail from './pages/admin/PatternDetail';
 import ActionCenter from './pages/admin/ActionCenter';
 import ActionDetail from './pages/admin/ActionDetail';
+import Outcomes from './pages/admin/Outcomes';
+import RecurrenceMonitor from './pages/admin/RecurrenceMonitor';
+import SemanticSearch from './pages/admin/SemanticSearch';
+import Departments from './pages/admin/Departments';
+import Evaluation from './pages/admin/Evaluation';
+import AuditLogs from './pages/admin/AuditLogs';
+
+// Safeguarding portal pages
+import SafeguardingPortal from './pages/safeguarding/SafeguardingPortal';
+import SensitiveCase from './pages/safeguarding/SensitiveCase';
 
 // ---------------------------------------------------------------------------
-// Placeholder pages – replaced in later stages
+// Shared utility page
 // ---------------------------------------------------------------------------
-function AdminDashboard() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">Admin Dashboard</h1>
-        <p className="text-slate-500">Administration portal — coming in Stage 4.</p>
-      </div>
-    </div>
-  );
-}
-
-function SafeguardingDashboard() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">Safeguarding Portal</h1>
-        <p className="text-slate-500">Sensitive Officer access — coming in a later stage.</p>
-      </div>
-    </div>
-  );
-}
-
 function Unauthorized() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -69,7 +59,6 @@ function App() {
         path="/user/*"
         element={
           <ProtectedRoute requiredRoles={['student', 'faculty', 'staff']}>
-            {/* Inner routes rendered inside the portal */}
             <Routes>
               <Route path="dashboard" element={<UserDashboard />} />
               <Route path="submit-grievance" element={<SubmitGrievance />} />
@@ -89,11 +78,18 @@ function App() {
           <ProtectedRoute requiredRoles={['admin']}>
             <Routes>
               <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="grievances" element={<AdminGrievances />} />
               <Route path="upload" element={<UploadDataset />} />
               <Route path="patterns" element={<Patterns />} />
               <Route path="patterns/:id" element={<PatternDetail />} />
               <Route path="action-center" element={<ActionCenter />} />
               <Route path="action-center/:id" element={<ActionDetail />} />
+              <Route path="outcomes" element={<Outcomes />} />
+              <Route path="recurrence" element={<RecurrenceMonitor />} />
+              <Route path="search" element={<SemanticSearch />} />
+              <Route path="departments" element={<Departments />} />
+              <Route path="evaluation" element={<Evaluation />} />
+              <Route path="audit-logs" element={<AuditLogs />} />
               <Route path="*" element={<Navigate to="dashboard" replace />} />
             </Routes>
           </ProtectedRoute>
@@ -104,8 +100,12 @@ function App() {
       <Route
         path="/safeguarding/*"
         element={
-          <ProtectedRoute requiredRoles={['sensitive_officer']}>
-            <SafeguardingDashboard />
+          <ProtectedRoute requiredRoles={['sensitive_officer', 'admin']}>
+            <Routes>
+              <Route path="portal" element={<SafeguardingPortal />} />
+              <Route path="case/:id" element={<SensitiveCase />} />
+              <Route path="*" element={<Navigate to="portal" replace />} />
+            </Routes>
           </ProtectedRoute>
         }
       />
