@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { submitGrievance } from '../../services/grievanceService';
+import UserLayout from '../../components/layouts/UserLayout';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -148,7 +149,8 @@ export default function SubmitGrievance() {
   // ---------- Success screen ----------
   if (submitted) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <UserLayout>
+        <div className="flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-md p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -188,13 +190,14 @@ export default function SubmitGrievance() {
             </button>
           </div>
         </div>
-      </div>
+        </div>
+      </UserLayout>
     );
   }
 
   // ---------- Form ----------
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4">
+    <UserLayout>
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -451,6 +454,6 @@ export default function SubmitGrievance() {
           </div>
         </form>
       </div>
-    </div>
+    </UserLayout>
   );
 }

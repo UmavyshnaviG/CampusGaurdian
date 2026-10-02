@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getMyGrievances } from '../../services/grievanceService';
 import { io as socketIOClient } from 'socket.io-client';
+import UserLayout from '../../components/layouts/UserLayout';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -99,28 +100,7 @@ export default function UserDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Nav */}
-      <nav className="bg-white border-b border-slate-100 px-4 sm:px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">CG</span>
-          </div>
-          <span className="font-semibold text-slate-800 text-sm">Campus Guardian 360</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link to="/user/my-grievances" className="text-sm text-slate-600 hover:text-blue-600 transition">
-            My Grievances
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-slate-500 hover:text-red-500 transition"
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
-
+    <UserLayout>
       <div className="max-w-4xl mx-auto py-8 px-4 space-y-6">
         {/* Welcome */}
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -230,6 +210,6 @@ export default function UserDashboard() {
           </Link>
         </div>
       </div>
-    </div>
+    </UserLayout>
   );
 }

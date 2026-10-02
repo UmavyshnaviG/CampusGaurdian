@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getMyGrievances } from '../../services/grievanceService';
+import UserLayout from '../../components/layouts/UserLayout';
 
 // ---------------------------------------------------------------------------
 // Badge helpers
@@ -63,7 +64,7 @@ export default function MyGrievances() {
   }, [page, fetchGrievances]);
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4">
+    <UserLayout>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -207,6 +208,6 @@ export default function MyGrievances() {
           </>
         )}
       </div>
-    </div>
+    </UserLayout>
   );
 }

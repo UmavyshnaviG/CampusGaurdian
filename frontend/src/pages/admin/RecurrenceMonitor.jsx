@@ -19,6 +19,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { getOutcomes, checkRecurrence } from '../../services/outcomeService';
+import AdminLayout from '../../components/layouts/AdminLayout';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -145,9 +146,9 @@ export default function RecurrenceMonitor() {
   }));
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <AdminLayout>
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4">
+      <header className="bg-white border-b border-slate-200 px-6 py-4 -mx-6 -mt-6 mb-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -192,7 +193,7 @@ export default function RecurrenceMonitor() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Stat bar */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <StatCard
@@ -377,7 +378,7 @@ export default function RecurrenceMonitor() {
             </table>
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

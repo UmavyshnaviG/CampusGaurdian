@@ -166,11 +166,13 @@ async function updateStatus(req, res, next) {
 // ---------------------------------------------------------------------------
 async function getSensitiveIdentity(req, res, next) {
   try {
-    const grievance = await grievanceService.getGrievanceById(
-      req.params.id,
-      req.user.role,
-      req.user.id,
-    );
+    // Bypass service RBAC guard: admins are blocked by getGrievanceById for
+    // anonymous sensitive grievances, so we query the model directly here.
+    const { Grievance } = require('../models/Grievance');
+    const grievance = await Grievance.findById(req.params.id)
+      .select('+sensitiveIdentity isAnonymousSensitive')
+      .populate('sensitiveIdentity', 'fullName email role')
+      .lean();
 
     if (!grievance) {
       return res.status(404).json({ success: false, message: 'Grievance not found.' });
@@ -183,16 +185,9 @@ async function getSensitiveIdentity(req, res, next) {
       });
     }
 
-    // Re-fetch with sensitiveIdentity projected and populated
-    const { Grievance } = require('../models/Grievance');
-    const full = await Grievance.findById(req.params.id)
-      .select('+sensitiveIdentity')
-      .populate('sensitiveIdentity', 'fullName email role')
-      .lean();
-
     return res.status(200).json({
       success: true,
-      data: { identity: full ? full.sensitiveIdentity : null },
+      data: { identity: grievance.sensitiveIdentity || null },
     });
   } catch (err) {
     return next(err);

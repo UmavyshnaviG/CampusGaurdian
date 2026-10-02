@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getGrievanceById } from '../../services/grievanceService';
+import UserLayout from '../../components/layouts/UserLayout';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -65,25 +66,29 @@ export default function GrievanceDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
+      <UserLayout>
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </UserLayout>
     );
   }
 
   if (error || !grievance) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500 mb-4">{error || 'Grievance not found.'}</p>
-          <button
-            onClick={() => navigate('/user/my-grievances')}
-            className="text-blue-600 hover:underline text-sm"
-          >
-            ← Back to My Grievances
-          </button>
+      <UserLayout>
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">{error || 'Grievance not found.'}</p>
+            <button
+              onClick={() => navigate('/user/my-grievances')}
+              className="text-blue-600 hover:underline text-sm"
+            >
+              ← Back to My Grievances
+            </button>
+          </div>
         </div>
-      </div>
+      </UserLayout>
     );
   }
 
@@ -91,7 +96,7 @@ export default function GrievanceDetail() {
   const hasAI = grievance.aiProcessingStatus === 'completed' && ai.topic;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4">
+    <UserLayout>
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div>
@@ -272,6 +277,6 @@ export default function GrievanceDetail() {
           </div>
         )}
       </div>
-    </div>
+    </UserLayout>
   );
 }
