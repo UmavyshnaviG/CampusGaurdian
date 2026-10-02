@@ -88,6 +88,30 @@
 
 ---
 
+## Stage 6 - Pattern Discovery Agent, Diagnostic Agent, Backend Pattern Routes, Frontend Patterns Pages
+**Status:** 100%
+**Completed:**
+- ai-service/app/agents/pattern_discovery.py — PatternDiscoveryAgent: validates 384-dim embeddings, HDBSCAN primary clustering (min_cluster_size=max(5,n//50), min_samples=3), silhouette evaluation, K-Means elbow-method fallback (k=2..15), per-cluster deterministic statistics (category/location/severity/sentiment/stakeholder/time/dept/year/keyword distributions), rule-based title generation, patternKey construction, template-based description, cosine-similarity-ranked evidence list. get_cluster_labels() accessor.
+- ai-service/app/agents/diagnostic.py — DiagnosticAgent: fully deterministic string-construction diagnosis with cautious language ('Data shows…', 'A possible contributing factor is…', 'Further verification may be required'). Category→factors rule table (16 categories). Location/category/temporal/stakeholder concentration analysis. Category→department routing table. Composite confidence scoring.
+- ai-service/app/routers/patterns.py — Replaced stub: POST /discover-patterns (PatternDiscoveryAgent + DiagnosticAgent per pattern, full AgentResponse); POST /diagnose (single pattern DiagnosticAgent); POST /predict (stub, Stage 7).
+- backend/src/models/Pattern.js — Mongoose schema: patternKey (unique), title, description, clusterId, category, primaryLocation, locations[], stakeholderGroups (Mixed), timeWindow sub-schema, reportCount, memberGrievanceIds ([ObjectId→Grievance]), severityDistribution/sentimentDistribution/categoryDistribution/weeklyTrend (Mixed), topKeywords[], evidence[], possibleFactors[], diagnosis/prediction/recommendation (Mixed), responsibleDepartment, status enum, silhouetteScore, clusterMethod, avgUrgency, avgConfidence, timestamps. Indexes on category/status/createdAt/reportCount.
+- backend/src/services/patternService.js — refreshPatterns() (fetch embeddings-complete grievances, serialize, POST to AI service, upsert patterns by patternKey, bulk-update clusterId on grievances); getPatterns(filters); getPatternById(id) with populate.
+- backend/src/controllers/patternController.js — listPatterns, getPattern, runRefreshPatterns controllers.
+- backend/src/routes/patterns.js — GET / (admin+sensitive_officer), GET /:id (admin+sensitive_officer), POST /refresh (admin only).
+- backend/src/server.js — Mounted /api/patterns route.
+- frontend/src/services/patternService.js — getPatterns(), getPatternById(), refreshPatterns() API calls.
+- frontend/src/pages/admin/Patterns.jsx — Pattern cards grid: title, report-count badge, primary location, category badge (colour-coded), urgency bar, top-keyword pills, status badge, responsible dept, View Evidence / Take Action buttons. Filter bar (category, status). Refresh Patterns button with loading state. Empty state.
+- frontend/src/pages/admin/PatternDetail.jsx — Full drill-down: header (title, count, date range, location, dept), Evidence section (representative complaints + distributions), WHO/WHAT/WHERE/WHEN multi-dimensional breakdown with Recharts (BarChart, PieChart, LineChart, all in ResponsiveContainer), Diagnosis section (summary, concentration analysis, possible factors with caution language, confidence), Recommendation placeholder, Take Action button.
+- frontend/src/App.jsx — Added /admin/patterns → Patterns and /admin/patterns/:id → PatternDetail routes.
+**Verified:**
+- python -m py_compile on pattern_discovery.py, diagnostic.py, patterns_router.py: PASSED
+- node --check on Pattern.js, patternService.js, patternController.js, routes/patterns.js, server.js: PASSED
+- npm run build (Vite): PASSED (2249 modules, 0 errors)
+**Tests:** Backend: PENDING, Frontend: PENDING
+**Known Issues:** None
+
+---
+
 ## Stage 5 - Synthetic Dataset Generator and Historical Upload Pipeline
 **Status:** 100%
 **Completed:**

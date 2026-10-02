@@ -13,6 +13,7 @@ const { connect: connectDB } = require('./config/database');
 const authRoutes = require('./routes/auth');
 const grievanceRoutes = require('./routes/grievances');
 const uploadRoutes = require('./routes/upload');
+const patternRoutes = require('./routes/patterns');
 
 // ---------------------------------------------------------------------------
 // App
@@ -55,6 +56,7 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/grievances', grievanceRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/patterns', patternRoutes);
 
 // 404 fallthrough handler
 app.use((_req, res) => {

@@ -12,6 +12,8 @@ import GrievanceDetail from './pages/user/GrievanceDetail';
 
 // Admin portal pages
 import UploadDataset from './pages/admin/UploadDataset';
+import Patterns from './pages/admin/Patterns';
+import PatternDetail from './pages/admin/PatternDetail';
 
 // ---------------------------------------------------------------------------
 // Placeholder pages – replaced in later stages
@@ -86,6 +88,8 @@ function App() {
             <Routes>
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="upload" element={<UploadDataset />} />
+              <Route path="patterns" element={<Patterns />} />
+              <Route path="patterns/:id" element={<PatternDetail />} />
               <Route path="*" element={<Navigate to="dashboard" replace />} />
             </Routes>
           </ProtectedRoute>
