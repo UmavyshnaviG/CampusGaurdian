@@ -112,6 +112,36 @@
 
 ---
 
+## Stage 7 - Prediction Agent, Recommendation Agent
+**Status:** 100%
+**Completed:**
+- ai-service/app/agents/prediction.py — PredictionAgent.predict(grievances, pattern): filters pattern members by memberGrievanceIds or clusterId, builds ISO-week time series, 4-week rolling average (numpy), linear regression + R² (numpy.polyfit), growth rate (recent vs prior 4-week avg), deterministic trend classification (Emerging/Increasing/Decreasing/Recurrence Risk/Stable/Insufficient Data), 4-week linear forecast with ±1.5σ uncertainty, cautious interpretation string. Returns weeklyData, forecast, trend, slope, growthRate, confidence, dataPoints, rSquared, interpretation.
+- ai-service/app/agents/recommendation.py — RecommendationAgent.recommend(pattern, diagnosis, prediction): derives problem statement, observed pattern narrative, evidence items (top 3 quoted + distributions), possible contributing factors (from diagnosis), rule-based suggestedAction from ACTION_TEMPLATES per category × urgency bucket (high/low), with {primary_location} and {dept} interpolated from actual data (never hardcoded). Composite confidence. Returns structured dict with language='evidence-based'.
+- ai-service/app/routers/patterns.py — Replaced predict stub: POST /predict (PredictionAgent.predict(), handles Insufficient Data as partial status).
+- ai-service/app/routers/actions.py — Replaced recommend stub: POST /recommend (RecommendationAgent.recommend()); generate-action and check-recurrence stubs retained.
+
+## Stage 8 - Action Coordination Agent, Action Center
+**Status:** 100%
+**Completed:**
+- ai-service/app/agents/action_coordination.py — ActionCoordinationAgent.generate_draft(recommendation, pattern, department): composes professional email subject and multi-section body from actual input data (no hardcoded values); validates delivery method based on SMTP_HOST/SMTP_USER env vars (draft_only/manual/email). Returns subject, body, toEmail, deliveryMethod, disclaimer, generatedFrom.
+- ai-service/app/routers/actions.py — Full implementation: POST /recommend (RecommendationAgent), POST /generate-action (ActionCoordinationAgent), POST /check-recurrence (stub for Stage 9).
+- backend/src/models/Action.js — Mongoose schema: actionNumber (ACT-YYYYMMDD-NNNN, auto-generated), patternId, grievanceIds, recommendedDepartment, approvedDepartment, actionTitle, originalRecommendation, modifiedRecommendation, emailDraft sub-schema (subject/body/toEmail/deliveryMethod/disclaimer), approvalStatus enum (5 states), approvedBy, approvalDate, approvalComments, actionStatus enum (8 states), assignedPerson, dueDate, resolutionDate, notes[], timestamps.
+- backend/src/services/actionService.js — generateAction() (fetch pattern, call AI predict/diagnose/recommend/generate-action sequentially, save Action doc, cache prediction+recommendation on Pattern), approveAction(), rejectAction(), updateActionStatus() (state machine validation), getActions() (paginated), getActionById() (fully populated).
+- backend/src/controllers/actionController.js — generateDraft, approveAction, rejectAction, updateStatus, listActions, getAction controllers.
+- backend/src/routes/actions.js — GET /, GET /:id, POST /generate-draft/:patternId, POST /approve, POST /reject, PATCH /:id/status (all admin-only with auditLog).
+- backend/src/server.js — Mounted /api/actions route.
+- frontend/src/services/actionService.js — generateActionDraft, getActions, getActionById, approveAction, rejectAction, updateActionStatus API calls.
+- frontend/src/pages/admin/ActionCenter.jsx — Stat cards (Total/Pending/Approved/Resolved), filter bar, paginated table with action#/pattern/department/status badge/date, navigation to ActionDetail.
+- frontend/src/pages/admin/ActionDetail.jsx — Breadcrumb, status timeline stepper (7-step horizontal), recommendation card (problem/observedPattern/evidence/factors/suggestedAction/confidence with caution box), email draft card (editable textarea, SMTP warning banner, Copy/Download buttons, no false 'Email sent'), approve/reject dialogs with confirmation, audit trail notes section.
+- frontend/src/App.jsx — Added /admin/action-center → ActionCenter and /admin/action-center/:id → ActionDetail routes.
+**Verified:**
+- python -m py_compile on prediction.py, recommendation.py, action_coordination.py, routers/patterns.py, routers/actions.py: PASSED (exit 0)
+- node --check on Action.js, actionService.js, actionController.js, routes/actions.js, server.js: PASSED (exit 0)
+**Tests:** Backend: PENDING, Frontend: PENDING
+**Known Issues:** None
+
+---
+
 ## Stage 5 - Synthetic Dataset Generator and Historical Upload Pipeline
 **Status:** 100%
 **Completed:**

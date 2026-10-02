@@ -2,6 +2,7 @@
 Router: /api/ai/patterns
 
 Stage 6 — Pattern Discovery and Diagnostic endpoints.
+Stage 7 — Prediction endpoint.
 """
 from __future__ import annotations
 
@@ -28,6 +29,11 @@ class DiscoverPatternsRequest(BaseModel):
 
 
 class DiagnoseRequest(BaseModel):
+    pattern: Dict[str, Any]
+
+
+class PredictRequest(BaseModel):
+    grievances: List[Dict[str, Any]]
     pattern: Dict[str, Any]
 
 
@@ -170,17 +176,55 @@ def diagnose(body: DiagnoseRequest) -> AgentResponse:
 
 
 # ---------------------------------------------------------------------------
-# POST /predict — stub (implemented in Stage 7)
+# POST /predict
 # ---------------------------------------------------------------------------
 
 
 @router.post("/predict", response_model=AgentResponse)
-def predict() -> AgentResponse:
+def predict(body: PredictRequest) -> AgentResponse:
+    """
+    Receive a list of grievances and a pattern dict.
+    Run PredictionAgent.predict() to produce trend analysis and forecast.
+    Returns AgentResponse with prediction in data.
+    """
+    from app.agents.prediction import PredictionAgent
+
+    agent = PredictionAgent()
+
+    try:
+        prediction = agent.predict(
+            grievances=body.grievances,
+            pattern=body.pattern,
+        )
+    except Exception as exc:
+        logger.exception("[patterns router] PredictionAgent.predict failed: %s", exc)
+        return AgentResponse(
+            agent="prediction",
+            status="failed",
+            data={},
+            confidence=0.0,
+            evidence=[],
+            warnings=[f"Prediction failed: {str(exc)}"],
+        )
+
+    trend = prediction.get("trend", "Unknown")
+    confidence = float(prediction.get("confidence", 0.0))
+
+    if trend == "Insufficient Data":
+        return AgentResponse(
+            agent="prediction",
+            status="partial",
+            data={"prediction": prediction},
+            confidence=0.0,
+            evidence=[],
+            warnings=[prediction.get("warning", "Insufficient data for prediction.")],
+        )
+
     return AgentResponse(
         agent="prediction",
-        status="not_implemented",
-        data={},
-        confidence=0.0,
-        evidence=[],
-        warnings=["Prediction agent not yet implemented (Stage 7)."],
+        status="success",
+        data={"prediction": prediction},
+        confidence=confidence,
+        evidence=[prediction.get("interpretation", "")],
+        warnings=[],
     )

@@ -14,6 +14,8 @@ import GrievanceDetail from './pages/user/GrievanceDetail';
 import UploadDataset from './pages/admin/UploadDataset';
 import Patterns from './pages/admin/Patterns';
 import PatternDetail from './pages/admin/PatternDetail';
+import ActionCenter from './pages/admin/ActionCenter';
+import ActionDetail from './pages/admin/ActionDetail';
 
 // ---------------------------------------------------------------------------
 // Placeholder pages – replaced in later stages
@@ -90,6 +92,8 @@ function App() {
               <Route path="upload" element={<UploadDataset />} />
               <Route path="patterns" element={<Patterns />} />
               <Route path="patterns/:id" element={<PatternDetail />} />
+              <Route path="action-center" element={<ActionCenter />} />
+              <Route path="action-center/:id" element={<ActionDetail />} />
               <Route path="*" element={<Navigate to="dashboard" replace />} />
             </Routes>
           </ProtectedRoute>
