@@ -85,3 +85,28 @@
 - npm run build (Vite) on frontend: PASSED (1446 modules, 0 errors)
 **Tests:** Backend: PENDING, Frontend: PENDING
 **Known Issues:** None
+
+---
+
+## Stage 5 - Synthetic Dataset Generator and Historical Upload Pipeline
+**Status:** 100%
+**Completed:**
+- data/generate_synthetic.py — Fully self-contained script generating 1550 records. 6 hidden patterns embedded (A: Hostel Network evening, B: Block C Electricity, C: Transport Route 3, D: Hostel Water, E: Academic CS Year 2, F: Anonymous Harassment). Uses only Python stdlib (csv, random, datetime). Shuffled output with all 14 required fields.
+- data/campus_grievances_historical.csv — Output dataset: 1550 records, all 14 fields, patterns verified.
+- ai-service/app/agents/data_understanding.py — DataUnderstandingAgent: inspect_schema() (deterministic: pandas load, per-column stats, SequenceMatcher + keyword mapping suggestions, quality score), process_batch() (apply column_mappings, return GrievanceInput-compatible dicts).
+- ai-service/app/routers/analysis.py — Added POST /inspect-schema and POST /process-batch endpoints using DataUnderstandingAgent. Existing /analyze-one and /batch-analyze untouched.
+- backend/src/services/uploadService.js — inspectDataset() (POST to AI inspect-schema), confirmAndProcess() (process-batch → batch-analyze chunks of 50 → persist as isHistorical=true Grievances, Socket.IO upload:progress events).
+- backend/src/controllers/uploadController.js — inspectDataset, confirmMapping controllers. Always return { success, data, message }.
+- backend/src/routes/upload.js — Replaced stubs: POST /inspect → inspectDataset controller, POST /confirm → confirmMapping controller.
+- frontend/src/services/uploadService.js — inspectDataset(file), confirmMapping(filepath, columnMappings) API calls.
+- frontend/src/pages/admin/UploadDataset.jsx — 4-step admin UI: drag-and-drop file zone, schema inspection table with confidence badges and mapping dropdowns, Socket.IO progress bar, completion screen.
+- frontend/src/App.jsx — Added /admin/upload → UploadDataset route inside nested admin Routes.
+**Verified:**
+- python -m py_compile data_understanding.py: PASSED
+- python -m py_compile generate_synthetic.py: PASSED
+- python -m py_compile analysis.py router: PASSED
+- python data/generate_synthetic.py: PASSED (1550 rows written)
+- node --check on uploadService.js, uploadController.js, routes/upload.js: PASSED
+- npm run build (Vite): PASSED (1448 modules, 0 errors)
+**Tests:** Backend: PENDING, Frontend: PENDING
+**Known Issues:** None

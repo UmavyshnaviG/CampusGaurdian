@@ -10,6 +10,9 @@ import SubmitGrievance from './pages/user/SubmitGrievance';
 import MyGrievances from './pages/user/MyGrievances';
 import GrievanceDetail from './pages/user/GrievanceDetail';
 
+// Admin portal pages
+import UploadDataset from './pages/admin/UploadDataset';
+
 // ---------------------------------------------------------------------------
 // Placeholder pages – replaced in later stages
 // ---------------------------------------------------------------------------
@@ -80,7 +83,11 @@ function App() {
         path="/admin/*"
         element={
           <ProtectedRoute requiredRoles={['admin']}>
-            <AdminDashboard />
+            <Routes>
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="upload" element={<UploadDataset />} />
+              <Route path="*" element={<Navigate to="dashboard" replace />} />
+            </Routes>
           </ProtectedRoute>
         }
       />
