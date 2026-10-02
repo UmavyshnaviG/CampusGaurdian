@@ -1,0 +1,9 @@
+{
+  "verdict": "CHANGES_REQUESTED",
+  "findings": [
+    "Admin identity reveal is broken: getSensitiveIdentity calls grievanceService.getGrievanceById(id, 'admin', userId), which returns null for anonymous sensitive grievances (grievanceService explicitly filters them out for admins). The route is authorized for admin, but admins always receive 404. Fix: bypass the service RBAC guard inside getSensitiveIdentity by fetching directly via Grievance.findById(id).select('+sensitiveIdentity').populate('sensitiveIdentity', 'fullName email role').lean() instead of going through getGrievanceById.",
+    "RecurrenceMonitor.jsx and Outcomes.jsx do not use AdminLayout despite AdminLayout now existing. FEAT-001 step 1 explicitly deferred AdminLayout wrapping 'once AdminLayout exists' — that condition is now met but neither page was updated. Both pages render custom standalone headers, so the sidebar navigation is absent for those two admin routes (/admin/recurrence and /admin/outcomes).",
+    "UserLayout is created but never consumed: UserDashboard, SubmitGrievance, MyGrievances, and GrievanceDetail do not import or use UserLayout. The component exists but provides no wrapping to the user portal — users see no unified top navigation bar."
+  ],
+  "summary": "3 issues found: admin identity-reveal returns 404 due to RBAC guard bypass in getSensitiveIdentity (confirmed bug), and RecurrenceMonitor/Outcomes plus the full user portal are not wrapped in the new layout components despite those layouts being created."
+}
