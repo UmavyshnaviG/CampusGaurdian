@@ -1,0 +1,7 @@
+{
+  "task_id": "task-stages-9-10",
+  "task_description": "Complete Stages 9 and 10 of Campus Guardian 360: finish the Outcome/Recurrence frontend (Stage 9 remaining), then implement Department model/routes, semantic search, evaluation endpoint, AdminLayout/UserLayout, AdminDashboard, AdminGrievances, SemanticSearch, Departments, Evaluation, AuditLogs, SafeguardingPortal, SensitiveCase pages, and wire all routes in App.jsx (Stage 10).",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}

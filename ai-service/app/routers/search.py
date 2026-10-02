@@ -76,6 +76,6 @@ def semantic_search(body: SearchRequest) -> AgentResponse:
         status="success",
         data={"results": results},
         confidence=1.0,
-        evidence=[body.query],
+        evidence=[{"query": body.query}],
         warnings=[],
     )

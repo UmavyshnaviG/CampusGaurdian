@@ -2,7 +2,7 @@
 Router: /api/ai/actions
 
 Stage 7 — Recommendation and Action Generation endpoints.
-Stage 9 — Recurrence Detection stub.
+Stage 9 — Recurrence Detection (OutcomeRecurrenceAgent).
 """
 from __future__ import annotations
 
@@ -34,6 +34,14 @@ class GenerateActionRequest(BaseModel):
     recommendation: Dict[str, Any]
     pattern: Dict[str, Any]
     department: Optional[Dict[str, Any]] = None
+
+
+class CheckRecurrenceRequest(BaseModel):
+    pattern: Dict[str, Any]
+    newGrievances: List[Dict[str, Any]]
+    historicalEmbeddings: List[List[float]]
+    historicalClusterId: str
+    action: Optional[Dict[str, Any]] = None
 
 
 # ---------------------------------------------------------------------------
@@ -135,17 +143,49 @@ def generate_action(body: GenerateActionRequest) -> AgentResponse:
 
 
 # ---------------------------------------------------------------------------
-# POST /check-recurrence — stub (Stage 9)
+# POST /check-recurrence — Stage 9
 # ---------------------------------------------------------------------------
 
 
 @router.post("/check-recurrence", response_model=AgentResponse)
-def check_recurrence() -> AgentResponse:
+def check_recurrence(body: CheckRecurrenceRequest) -> AgentResponse:
+    """
+    Receive pattern, new grievances, historical embeddings, and cluster id.
+    Run OutcomeRecurrenceAgent.detect_recurrence() to detect pattern recurrence.
+    Returns AgentResponse with recurrence analysis in data.
+    """
+    from app.agents.outcome_recurrence import OutcomeRecurrenceAgent
+
+    agent = OutcomeRecurrenceAgent()
+
+    try:
+        result = agent.detect_recurrence(
+            pattern=body.pattern,
+            new_grievances=body.newGrievances,
+            historical_embeddings=body.historicalEmbeddings,
+            historical_cluster_id=body.historicalClusterId,
+        )
+    except Exception as exc:
+        logger.exception(
+            "[actions router] OutcomeRecurrenceAgent.detect_recurrence failed: %s", exc
+        )
+        return AgentResponse(
+            agent="outcome_recurrence",
+            status="failed",
+            data={},
+            confidence=0.0,
+            evidence=[],
+            warnings=[f"Recurrence detection failed: {str(exc)}"],
+        )
+
+    is_recurrence = result.get("isRecurrence", False)
     return AgentResponse(
         agent="outcome_recurrence",
-        status="not_implemented",
-        data={},
-        confidence=0.0,
-        evidence=[],
-        warnings=["Recurrence detection not yet implemented (Stage 9)."],
+        status="success",
+        data={"recurrence": result},
+        confidence=float(result.get("confidence", 0.0)),
+        evidence=result.get("evidenceOfRecurrence", []),
+        warnings=(
+            ["Recurrence detected — review recommended."] if is_recurrence else []
+        ),
     )

@@ -57,5 +57,5 @@ class AgentResponse(BaseModel):
     status: str  # 'success', 'partial', 'failed'
     data: Dict[str, Any] = Field(default_factory=dict)
     confidence: float = 0.0
-    evidence: List[Dict[str, Any]] = Field(default_factory=list)
+    evidence: List[Any] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
