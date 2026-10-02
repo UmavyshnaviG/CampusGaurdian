@@ -4,26 +4,21 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
+// User portal pages
+import UserDashboard from './pages/user/UserDashboard';
+import SubmitGrievance from './pages/user/SubmitGrievance';
+import MyGrievances from './pages/user/MyGrievances';
+import GrievanceDetail from './pages/user/GrievanceDetail';
+
 // ---------------------------------------------------------------------------
 // Placeholder pages – replaced in later stages
 // ---------------------------------------------------------------------------
-function UserDashboard() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">User Dashboard</h1>
-        <p className="text-slate-500">Student / Faculty / Staff portal — coming in Stage 3.</p>
-      </div>
-    </div>
-  );
-}
-
 function AdminDashboard() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-slate-800 mb-2">Admin Dashboard</h1>
-        <p className="text-slate-500">Administration portal — coming in Stage 3.</p>
+        <p className="text-slate-500">Administration portal — coming in Stage 4.</p>
       </div>
     </div>
   );
@@ -34,7 +29,7 @@ function SafeguardingDashboard() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-slate-800 mb-2">Safeguarding Portal</h1>
-        <p className="text-slate-500">Sensitive Officer access — coming in Stage 3.</p>
+        <p className="text-slate-500">Sensitive Officer access — coming in a later stage.</p>
       </div>
     </div>
   );
@@ -67,7 +62,15 @@ function App() {
         path="/user/*"
         element={
           <ProtectedRoute requiredRoles={['student', 'faculty', 'staff']}>
-            <UserDashboard />
+            {/* Inner routes rendered inside the portal */}
+            <Routes>
+              <Route path="dashboard" element={<UserDashboard />} />
+              <Route path="submit-grievance" element={<SubmitGrievance />} />
+              <Route path="my-grievances" element={<MyGrievances />} />
+              <Route path="grievance/:id" element={<GrievanceDetail />} />
+              {/* Default: redirect /user → /user/dashboard */}
+              <Route path="*" element={<Navigate to="dashboard" replace />} />
+            </Routes>
           </ProtectedRoute>
         }
       />

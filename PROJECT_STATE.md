@@ -40,3 +40,27 @@
 - npm run build (Vite) on frontend: PASSED (1412 modules, 0 errors)
 **Tests:** Backend: PENDING, Frontend: PENDING
 **Known Issues:** None
+
+---
+
+## Stage 3 - Complete Grievance Management
+**Status:** 100%
+**Completed:**
+- backend/src/models/Grievance.js — Full Mongoose schema with all required fields, indexes, pre-save hook (isSensitive, isAnonymousSensitive derivation), sensitiveIdentity field (select:false), generateTrackingCode helper
+- backend/src/config/upload.js — Multer diskStorage, MIME+extension filter (jpg/jpeg/png/gif/pdf/doc/docx), 10 MB limit, auto-creates uploads/ dir
+- backend/src/services/grievanceService.js — createGrievance (privacy-preserving anonymous sensitive path), getGrievances (RBAC), getGrievanceById (RBAC), updateGrievanceStatus, callAIService (fire-and-forget, non-fatal)
+- backend/src/controllers/grievanceController.js — submitGrievance, listGrievances, getGrievanceById, updateStatus; Socket.IO emit on status update via req.app.get('io')
+- backend/src/routes/grievances.js — POST /, GET /, GET /:id, PATCH /:id/status with express-validator
+- backend/src/routes/upload.js — POST /inspect and POST /confirm stubs for Stage 5
+- backend/src/server.js — Updated: grievance + upload routes mounted, /uploads static serving, io exposed on app
+- frontend/src/services/grievanceService.js — submitGrievance, getMyGrievances, getGrievanceById, updateStatus
+- frontend/src/pages/user/SubmitGrievance.jsx — Full form: auto-populated fields, 16-category selector, anonymous checkbox for sensitive categories (with privacy warning), location, description with live char count, severity color buttons, file upload, success screen with tracking code
+- frontend/src/pages/user/MyGrievances.jsx — Paginated table, severity/status badges, empty state
+- frontend/src/pages/user/GrievanceDetail.jsx — Full detail: submission fields, AI metadata section (pending/failed/available states), status timeline, attachment download
+- frontend/src/pages/user/UserDashboard.jsx — Stats cards, recent grievances, Socket.IO client (grievance:statusUpdate), quick action buttons
+- frontend/src/App.jsx — Updated with /user/dashboard, /user/submit-grievance, /user/my-grievances, /user/grievance/:id routes using nested Routes
+**Verified:**
+- node --check on all 7 backend JS files: PASSED
+- npm run build (Vite) on frontend: PASSED (1446 modules, 0 errors)
+**Tests:** Backend: PENDING, Frontend: PENDING
+**Known Issues:** None

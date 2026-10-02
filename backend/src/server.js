@@ -11,6 +11,8 @@ const { Server: SocketIOServer } = require('socket.io');
 
 const { connect: connectDB } = require('./config/database');
 const authRoutes = require('./routes/auth');
+const grievanceRoutes = require('./routes/grievances');
+const uploadRoutes = require('./routes/upload');
 
 // ---------------------------------------------------------------------------
 // App
@@ -43,9 +45,16 @@ const authLimiter = rateLimit({
 });
 
 // ---------------------------------------------------------------------------
+// Static file serving for uploaded attachments
+// ---------------------------------------------------------------------------
+app.use('/uploads', express.static('uploads'));
+
+// ---------------------------------------------------------------------------
 // Routes
 // ---------------------------------------------------------------------------
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/grievances', grievanceRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // 404 fallthrough handler
 app.use((_req, res) => {
@@ -81,6 +90,9 @@ io.on('connection', (socket) => {
     console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
   });
 });
+
+// Make io accessible to route controllers via req.app.get('io')
+app.set('io', io);
 
 // ---------------------------------------------------------------------------
 // Bootstrap
