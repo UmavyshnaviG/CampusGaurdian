@@ -43,6 +43,27 @@
 
 ---
 
+## Stage 4 - AI Service Core — FastAPI App, Feedback Intelligence Agent, AI Metadata Pipeline
+**Status:** 100%
+**Completed:**
+- ai-service/app/main.py — Full FastAPI app with lifespan startup (model load + NLTK downloads), CORS middleware, all 4 routers mounted at /api/ai, health endpoint, root endpoint
+- ai-service/app/core/config.py — Pydantic BaseSettings (MODEL_NAME, PORT, HOST, DEBUG, BACKEND_URL) reading from .env; added pydantic-settings==2.0.3 to requirements.txt
+- ai-service/app/core/model_manager.py — Singleton ModelManager: lazy SentenceTransformer load, encode(), encode_one(), cosine_sim(), compare_one_to_many()
+- ai-service/app/core/schemas.py — Pydantic v2 models: GrievanceInput, AIMetadata (384-dim embedding, all metadata fields), AgentResponse
+- ai-service/app/agents/feedback_intelligence.py — Full FeedbackIntelligenceAgent: 10-step pipeline (preprocessing, topic/subtopic/issueType extraction, keyword extraction, VADER sentiment, urgency scoring, sensitive flag, sentence-transformer embedding, duplicate probability placeholder, priority recommendation, confidence)
+- ai-service/app/routers/analysis.py — POST /analyze-one (single grievance → AgentResponse), POST /batch-analyze (up to 2000, independent per-item failure handling)
+- ai-service/app/routers/patterns.py — Stubs for /discover-patterns, /diagnose, /predict (Stage 6)
+- ai-service/app/routers/actions.py — Stubs for /recommend, /generate-action, /check-recurrence (Stages 7-9)
+- ai-service/app/routers/evaluation.py — GET /evaluate returning metrics skeleton
+- backend/src/services/grievanceService.js — callAIService updated: reads AgentResponse.data.metadata, maps all AIMetadata fields to Grievance.aiMetadata, handles status='failed' from AI, full try/catch — never crashes grievance submission
+**Verified:**
+- python -m py_compile on all 9 Python files: PASSED
+- node --check on grievanceService.js: PASSED
+**Tests:** Backend: PENDING, AI Service: PENDING
+**Known Issues:** None
+
+---
+
 ## Stage 3 - Complete Grievance Management
 **Status:** 100%
 **Completed:**

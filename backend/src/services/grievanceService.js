@@ -15,14 +15,43 @@ async function callAIService(grievanceId, text, category, severity) {
       { timeout: 30000 },
     );
 
-    if (response.data && response.data.metadata) {
+    // The AI service returns an AgentResponse; metadata lives inside data.metadata
+    const agentResponse = response.data;
+    if (
+      agentResponse &&
+      agentResponse.status === 'success' &&
+      agentResponse.data &&
+      agentResponse.data.metadata
+    ) {
+      const meta = agentResponse.data.metadata;
       await Grievance.findByIdAndUpdate(grievanceId, {
         aiMetadata: {
-          ...response.data.metadata,
+          topic: meta.topic,
+          subTopic: meta.subTopic,
+          issueType: meta.issueType,
+          keywords: meta.keywords,
+          sentiment: meta.sentiment,
+          sentimentScore: meta.sentimentScore,
+          urgency: meta.urgency,
+          // Store embedding reference but not the full 384-dim vector in the main doc
+          duplicateProbability: meta.duplicateProbability,
+          similarityGroup: meta.similarityGroup || null,
+          clusterId: meta.clusterId || null,
+          recurrenceIndicator: meta.recurrenceIndicator,
+          priorityRecommendation: meta.priorityRecommendation,
+          confidence: meta.confidence,
+          sensitiveFlag: meta.sensitiveFlag,
           processedAt: new Date(),
         },
         aiProcessingStatus: 'completed',
       });
+    } else if (agentResponse && agentResponse.status === 'failed') {
+      // AI returned a failure response — log warnings
+      const warnings = (agentResponse.warnings || []).join('; ');
+      console.warn(
+        `[GrievanceService] AI analysis failed for ${grievanceId}: ${warnings}`,
+      );
+      await Grievance.findByIdAndUpdate(grievanceId, { aiProcessingStatus: 'failed' });
     }
   } catch (err) {
     // Non-fatal: mark as failed but do NOT propagate
