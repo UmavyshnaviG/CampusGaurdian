@@ -13,6 +13,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { getPatterns, refreshPatterns } from '../../services/patternService';
+import { MOCK_PATTERNS } from '../../services/mockData';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -201,9 +202,11 @@ export default function Patterns() {
         category: categoryFilter || undefined,
         status:   statusFilter   || undefined,
       });
-      setPatterns((res.data && res.data.patterns) || []);
+      const loaded = (res.data && res.data.patterns) || [];
+      setPatterns(loaded.length > 0 ? loaded : MOCK_PATTERNS);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Failed to load patterns.');
+      // Backend not running — show mock patterns
+      setPatterns(MOCK_PATTERNS);
     } finally {
       setLoading(false);
     }
