@@ -109,6 +109,35 @@ function Login() {
             </div>
           )}
 
+          {/* Quick demo login buttons */}
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-xs font-semibold text-amber-800 mb-3">⚡ Quick Demo Login (no backend needed)</p>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { label: '👨‍💼 Admin', email: 'admin@campus.edu', colour: 'bg-indigo-600 hover:bg-indigo-700' },
+                { label: '🎓 Student', email: 'student@campus.edu', colour: 'bg-blue-600 hover:bg-blue-700' },
+                { label: '👩‍🏫 Faculty', email: 'faculty@campus.edu', colour: 'bg-emerald-600 hover:bg-emerald-700' },
+                { label: '🛡️ Officer', email: 'officer@campus.edu', colour: 'bg-purple-600 hover:bg-purple-700' },
+              ].map(({ label, email, colour }) => (
+                <button
+                  key={email}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => {
+                    setFormData({ email, password: 'demo123' });
+                    setTimeout(() => {
+                      document.getElementById('demo-submit')?.click();
+                    }, 100);
+                  }}
+                  className={`${colour} text-white text-xs font-medium py-2 px-3 rounded-lg transition disabled:opacity-50`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-amber-600 mt-2">Password for all: <span className="font-mono font-bold">demo123</span></p>
+          </div>
+
           <form onSubmit={handleSubmit} noValidate>
             {/* Email */}
             <div className="mb-5">
@@ -159,6 +188,7 @@ function Login() {
             </div>
 
             <button
+              id="demo-submit"
               type="submit"
               disabled={loading}
               className="w-full bg-blue-700 hover:bg-blue-800 disabled:bg-blue-400 text-white font-semibold rounded-lg py-2.5 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
