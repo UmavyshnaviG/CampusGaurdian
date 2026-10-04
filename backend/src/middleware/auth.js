@@ -16,6 +16,25 @@ function authenticate(req, res, next) {
   }
 
   const token = authHeader.split(' ')[1];
+
+  // -----------------------------------------------------------------------
+  // DEMO BYPASS — development only
+  // Mock tokens issued by the frontend login page are accepted here so the
+  // admin demo works without a real JWT. Remove this block for production.
+  // -----------------------------------------------------------------------
+  if (process.env.NODE_ENV !== 'production') {
+    const DEMO_MAP = {
+      'mock-token-admin':             { id: 'demo-admin-001',   role: 'admin',             email: 'admin@campus.edu' },
+      'mock-token-student':           { id: 'demo-student-001', role: 'student',           email: 'student@campus.edu' },
+      'mock-token-faculty':           { id: 'demo-faculty-001', role: 'faculty',           email: 'faculty@campus.edu' },
+      'mock-token-sensitive_officer': { id: 'demo-officer-001', role: 'sensitive_officer', email: 'officer@campus.edu' },
+    };
+    if (DEMO_MAP[token]) {
+      req.user = DEMO_MAP[token];
+      return next();
+    }
+  }
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = {

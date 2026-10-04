@@ -22,8 +22,7 @@ import {
   YAxis,
 } from 'recharts';
 import AdminLayout from '../../components/layouts/AdminLayout';
-import { getMetrics } from '../../services/evaluationService';
-import { MOCK_EVALUATION } from '../../services/mockData';
+import { getMetrics, getProcessingStatus, processPending } from '../../services/evaluationService';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -71,23 +70,45 @@ const PIE_COLOURS = {
 // Evaluation
 // ---------------------------------------------------------------------------
 export default function Evaluation() {
-  const [metrics, setMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [metrics, setMetrics]         = useState(null);
+  const [procStatus, setProcStatus]   = useState(null);
+  const [loading, setLoading]         = useState(true);
+  const [processing, setProcessing]   = useState(false);
+  const [processMsg, setProcessMsg]   = useState('');
+  const [error, setError]             = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await getMetrics();
-      setMetrics(res.data?.metrics || MOCK_EVALUATION);
+      const [metricsRes, procRes] = await Promise.all([
+        getMetrics().catch(() => null),
+        getProcessingStatus().catch(() => null),
+      ]);
+      setMetrics(metricsRes?.data?.metrics || null);
+      setProcStatus(procRes?.data || null);
     } catch (err) {
-      setMetrics(MOCK_EVALUATION);
-      setError('');
+      setError('Failed to load evaluation data.');
+      setMetrics(null);
     } finally {
       setLoading(false);
     }
   }, []);
+
+  async function handleProcess() {
+    setProcessing(true);
+    setProcessMsg('');
+    try {
+      const res = await processPending(50);
+      const d = res?.data;
+      setProcessMsg(d ? `Processed ${d.processed}: ${d.succeeded} succeeded, ${d.failed} failed. ${d.remaining} remaining.` : 'Done.');
+      await load();
+    } catch {
+      setProcessMsg('Processing failed — is the AI service running on port 8000?');
+    } finally {
+      setProcessing(false);
+    }
+  }
 
   useEffect(() => {
     load();
@@ -99,11 +120,11 @@ export default function Evaluation() {
   const outcomes   = metrics?.outcomes   || {};
   const ai         = metrics?.ai         || null;
 
-  // Chart data
-  const categoryData = (grievances.byCategory || []).map((item) => ({
-    name: item._id || item.category || '—',
-    count: item.count || 0,
-  }));
+  // byCategory from real API is an object { "Network/IT": 342, ... }
+  const categoryData = Object.entries(grievances.byCategory || {})
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
 
   const pieData = [
     { name: 'Improved', value: outcomes.improved || 0 },
@@ -133,8 +154,36 @@ export default function Evaluation() {
           </button>
         </div>
 
-        {/* Error */}
-        {error && (
+        {/* AI Processing Status */}
+        {procStatus && (
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-700">AI Processing Status</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {procStatus.completed} of {procStatus.total} grievances processed
+                  {procStatus.pending > 0 && ` — ${procStatus.pending} pending`}
+                  {procStatus.failed > 0 && ` — ${procStatus.failed} failed`}
+                </p>
+              </div>
+              <button
+                onClick={handleProcess}
+                disabled={processing || procStatus.pending === 0}
+                className="flex items-center gap-2 px-3 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {processing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {processing ? 'Processing...' : 'Process 50 Pending'}
+              </button>
+            </div>
+            <div className="w-full bg-slate-100 rounded-full h-2">
+              <div className="bg-indigo-500 h-2 rounded-full transition-all"
+                style={{ width: procStatus.total > 0 ? `${(procStatus.completed / procStatus.total) * 100}%` : '0%' }} />
+            </div>
+            {processMsg && <p className="text-xs text-slate-500 mt-2">{processMsg}</p>}
+          </div>
+        )}
+
+        {/* Error */}        {error && (
           <div
             role="alert"
             className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm"

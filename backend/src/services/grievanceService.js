@@ -135,6 +135,8 @@ async function getGrievances(filters, userRole, userId) {
     limit = 20,
     category,
     status,
+    severity,
+    search,
     dateFrom,
     dateTo,
   } = filters;
@@ -143,26 +145,24 @@ async function getGrievances(filters, userRole, userId) {
 
   // ----- Role-based access control -----
   const isAdmin = userRole === 'admin';
-  const isSensitiveOfficer = userRole === 'sensitive_officer';
   const isRegularUser = ['student', 'faculty', 'staff'].includes(userRole);
 
   if (isRegularUser) {
-    // Regular users see only their own non-anonymous grievances
     query.submittedBy = userId;
   } else if (isAdmin) {
-    // Admins see all non-anonymous-sensitive grievances
     query.isAnonymousSensitive = { $ne: true };
-    // Additionally, admins do not see submittedBy for sensitive cases — handled in projection
   }
-  // sensitive_officer: no restriction, sees all
+  // sensitive_officer: no restriction
 
   // ----- Optional filters -----
   if (category) query.category = category;
-  if (status) query.status = status;
+  if (status)   query.status = status;
+  if (severity) query.rawSeverity = severity;
+  if (search)   query.description = { $regex: search, $options: 'i' };
   if (dateFrom || dateTo) {
     query.createdAt = {};
     if (dateFrom) query.createdAt.$gte = new Date(dateFrom);
-    if (dateTo) query.createdAt.$lte = new Date(dateTo);
+    if (dateTo)   query.createdAt.$lte = new Date(dateTo);
   }
 
   const skip = (Number(page) - 1) * Number(limit);

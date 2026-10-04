@@ -7,7 +7,7 @@ const { authenticate, authorize, auditLog } = require('../middleware/auth');
 
 const router = express.Router();
 
-const VALID_ROLES = ['student', 'faculty', 'staff'];
+const VALID_ROLES = ['student', 'faculty', 'staff', 'admin', 'sensitive_officer'];
 
 // POST /api/auth/register
 router.post(

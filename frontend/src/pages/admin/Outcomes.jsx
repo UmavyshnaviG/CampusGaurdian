@@ -23,7 +23,6 @@ import {
 } from 'recharts';
 import { getOutcomes, checkRecurrence } from '../../services/outcomeService';
 import AdminLayout from '../../components/layouts/AdminLayout';
-import { MOCK_OUTCOMES } from '../../services/mockData';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -314,13 +313,12 @@ export default function Outcomes() {
         limit: LIMIT,
       });
       const data = res.data || {};
-      const loaded = data.outcomes || [];
-      setOutcomes(loaded.length > 0 ? loaded : MOCK_OUTCOMES);
-      setTotal(data.total || MOCK_OUTCOMES.length);
+      setOutcomes(data.outcomes || []);
+      setTotal(data.total || 0);
     } catch (err) {
-      setOutcomes(MOCK_OUTCOMES);
-      setTotal(MOCK_OUTCOMES.length);
-      setError('');
+      setError('Failed to load outcomes. Check that the backend is running.');
+      setOutcomes([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }

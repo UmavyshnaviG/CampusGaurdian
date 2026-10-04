@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import AdminLayout from '../../components/layouts/AdminLayout';
 import { getGrievances } from '../../services/grievanceService';
-import { MOCK_GRIEVANCES } from '../../services/mockData';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -108,21 +107,21 @@ export default function AdminGrievances() {
       if (categoryFilter) filters.category = categoryFilter;
       if (statusFilter)   filters.status   = statusFilter;
       if (severityFilter) filters.severity  = severityFilter;
+      if (search.trim())  filters.search   = search.trim();
       const res = await getGrievances(filters);
       const data = res.data || {};
-      const loaded = data.grievances || [];
-      setGrievances(loaded.length > 0 ? loaded : MOCK_GRIEVANCES);
-      setTotal(data.total || MOCK_GRIEVANCES.length);
+      setGrievances(data.grievances || []);
+      setTotal(data.total || 0);
       setPage(data.page || pageNum);
       setPages(data.pages || 1);
     } catch (err) {
-      setGrievances(MOCK_GRIEVANCES);
-      setTotal(MOCK_GRIEVANCES.length);
-      setError('');
+      setError('Failed to load grievances. Check that the backend is running.');
+      setGrievances([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
-  }, [categoryFilter, statusFilter, severityFilter]);
+  }, [categoryFilter, statusFilter, severityFilter, search]);
 
   useEffect(() => {
     setPage(1);
@@ -134,16 +133,8 @@ export default function AdminGrievances() {
     load(newPage);
   }
 
-  // Client-side text filter on loaded grievances
-  const filtered = search.trim()
-    ? grievances.filter((g) => {
-        const q = search.toLowerCase();
-        return (
-          (g.trackingCode || '').toLowerCase().includes(q) ||
-          (g.description || '').toLowerCase().includes(q)
-        );
-      })
-    : grievances;
+  // Search is now server-side — use grievances directly
+  const filtered = grievances;
 
   return (
     <AdminLayout>

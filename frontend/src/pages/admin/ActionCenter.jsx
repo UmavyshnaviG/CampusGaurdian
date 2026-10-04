@@ -12,7 +12,6 @@ import {
   Zap,
 } from 'lucide-react';
 import { getActions } from '../../services/actionService';
-import { MOCK_ACTIONS } from '../../services/mockData';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -118,14 +117,14 @@ export default function ActionCenter() {
       if (apStatus) filters.approvalStatus = apStatus;
       const res = await getActions(filters);
       const data = res.data || {};
-      const loaded = data.actions || [];
-      setActions(loaded.length > 0 ? loaded : MOCK_ACTIONS);
-      setTotal(data.total || MOCK_ACTIONS.length);
+      setActions(data.actions || []);
+      setTotal(data.total || 0);
       setPage(data.page || 1);
       setPages(data.pages || 1);
     } catch (err) {
-      setActions(MOCK_ACTIONS);
-      setTotal(MOCK_ACTIONS.length);
+      setError('Failed to load actions. Check that the backend is running.');
+      setActions([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }

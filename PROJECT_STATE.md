@@ -249,3 +249,56 @@ npm run dev
 python data/generate_synthetic.py
 ```
 Then upload `data/campus_grievances_historical.csv` via the Admin Upload page.
+
+---
+
+## Real MongoDB Data Integration
+**Status:** 100% Complete
+**Date:** 2024
+
+### What was done
+
+**Backend changes:**
+- `backend/src/middleware/auth.js` — Added demo bypass: mock tokens (mock-token-admin etc.) accepted as valid in NODE_ENV≠production. Real JWT path unchanged.
+- `backend/src/routes/auth.js` — VALID_ROLES expanded to include 'admin' and 'sensitive_officer'
+- `backend/src/scripts/seedAdmin.js` — Seeds default admin user (admin@campusguardian.edu / Admin@CG360) on startup if none exists
+- `backend/src/server.js` — Calls seedAdminUser() in bootstrap
+- `backend/src/routes/evaluation.js` — Added 3 new endpoints:
+  - GET /api/evaluation/weekly-trend (last 12 weeks ISO-week aggregation)
+  - GET /api/evaluation/processing-status (pending/completed/failed counts)
+  - POST /api/evaluation/process-pending (processes up to 200 grievances through AI service in chunks of 10)
+- `backend/src/controllers/grievanceController.js` — Passes severity and search query params to service
+- `backend/src/services/grievanceService.js` — Applies rawSeverity and description $regex filters
+
+**Frontend changes:**
+- `frontend/src/services/evaluationService.js` — Added getWeeklyTrend(), getProcessingStatus(), processPending()
+- `frontend/src/pages/admin/AdminDashboard.jsx` — Fully rewritten with real MongoDB data: stat cards from /metrics, category bar chart from byCategory, weekly trend line chart from /weekly-trend, AI processing status bar with "Process 50 Pending" button, real recent grievances table. All mock fallbacks removed.
+- All 7 admin pages cleaned of mock data:
+  - AdminGrievances — real data, server-side search/severity filters, proper empty state
+  - Patterns — real data, empty state with Refresh button
+  - ActionCenter — real data, proper empty state
+  - Outcomes — real data, proper empty state
+  - Departments — real data (10 seeded departments always present)
+  - Evaluation — real metrics + processing status panel with Process button
+  - AuditLogs — real audit logs, proper empty state
+
+### MongoDB collections in use
+- grievances: 1549 records (all historical, aiProcessingStatus=pending until processed)
+- departments: 10 seeded records
+- patterns: 0 (populated after Refresh Patterns)
+- actions: 0 (populated after taking action on a pattern)
+- outcomes: 0 (populated after resolving an action)
+- auditlogs: populated by admin actions
+
+### How to use
+1. Start backend: `node src/server.js` — auto-seeds admin user and 1549 grievances
+2. Start AI service: `uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`
+3. Start frontend: `npm run dev`
+4. Login as Admin (mock card — no real JWT needed for demo)
+5. Dashboard shows real counts from MongoDB
+6. Click "Process 50 Pending" to run AI analysis on batches of grievances
+7. After processing, click "Refresh Patterns" on /admin/patterns to discover patterns
+8. Take action on patterns via /admin/action-center
+
+**Build:** PASS (0 errors)
+**Backend syntax:** PASS (all files)

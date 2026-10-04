@@ -79,6 +79,8 @@ async function listGrievances(req, res, next) {
       limit: req.query.limit || 20,
       category: req.query.category,
       status: req.query.status,
+      severity: req.query.severity,
+      search: req.query.search,
       dateFrom: req.query.dateFrom,
       dateTo: req.query.dateTo,
     };

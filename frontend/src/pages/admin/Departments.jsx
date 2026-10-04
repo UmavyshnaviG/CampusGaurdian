@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import AdminLayout from '../../components/layouts/AdminLayout';
 import { getDepartments, createDepartment, updateDepartment } from '../../services/departmentService';
-import { MOCK_DEPARTMENTS } from '../../services/mockData';
 
 // ---------------------------------------------------------------------------
 // Modal form
@@ -193,11 +192,10 @@ export default function Departments() {
     setError('');
     try {
       const res = await getDepartments();
-      const loaded = res.data?.departments || [];
-      setDepartments(loaded.length > 0 ? loaded : MOCK_DEPARTMENTS);
+      setDepartments(res.data?.departments || []);
     } catch (err) {
-      setDepartments(MOCK_DEPARTMENTS);
-      setError('');
+      setError('Failed to load departments. Check that the backend is running.');
+      setDepartments([]);
     } finally {
       setLoading(false);
     }
